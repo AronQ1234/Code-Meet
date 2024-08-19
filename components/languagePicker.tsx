@@ -1,18 +1,29 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useRef } from 'react';
 
-const LanguagePicker = ({onLanguageChange, color}:any,) => {
-    const handleChange = (e:any) => {
-      setTimeout(() => {
-        onLanguageChange(e.target.value);
-        console.log(e.target.value)
-      }, 0);
-    };
+
+const LanguagePicker = ({onLanguageChange, color, langChange}:any,) => {
+  const dropdownRef = useRef<HTMLSelectElement>(null);
+  const handleChange = (e:any) => {
+    setTimeout(() => {
+      onLanguageChange(e.target.value);
+      console.log(e.target.value)
+    }, 0);
+  };
   const OppColor = color === '#FFFFFF' ? '#1E1E1E' : '#FFFFFF';
   console.log(OppColor)
+  
+  useEffect(() => {
+    if (langChange && langChange !== "") {
+      if (dropdownRef.current) {
+        dropdownRef.current.value = langChange;
+      }
+    }
+  }, [langChange]);
   return (
-    <select onChange={handleChange}  style={{background: color, color:OppColor}}>
+    <select ref={dropdownRef} onChange={handleChange}  style={{background: color, color:OppColor}}>
         <option  style={{background: color, color:OppColor}} value="javascript">JavaScript</option>
-        <option  style={{background: color, color:OppColor}} value="python">Pyhton</option>
+        <option  style={{background: color, color:OppColor}} value="python">Python</option>
         <option  style={{background: color, color:OppColor}} value="cpp">C++</option>
         <option  style={{background: color, color:OppColor}} value="typescript">Typescript</option>
         <option  style={{background: color, color:OppColor}} value="c">C</option>
