@@ -17,8 +17,6 @@ interface CodeEditorProps {
   collab: boolean;
 }
 
-//TODO: copy link button create meeting button 
-
 export default function CodeEditor({collab}:CodeEditorProps) {
   const [code, setCode] = useState<string>("//this is the editor");
   const [input, setInput] = useState<string>("");
@@ -44,27 +42,33 @@ export default function CodeEditor({collab}:CodeEditorProps) {
     console.log(`Color changed to: ${color}`);
   }, [theme, color]);
 
-  if(collab){
-    console.log(collab)
-    useEffect(() => {
+ 
+  useEffect(() => {
+    if(collab){
+      console.log(collab)
       socket?.on('code-change', (newCode) => {
         setCode(newCode);
       });
-  
-      return () => {
-        socket?.off('code-change');
-      };
-    }, [socket]);
-    useEffect(() => {
+    };
+
+    return () => {
+      socket?.off('code-change');
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if(collab){
+      console.log(collab)
       socket?.on('lang-change', (currentLang) => {
         setLang(currentLang);
       });
-  
-      return () => {
-        socket?.off('lang-change');
-      };
-    }, [socket]);
-  }
+    };
+
+    return () => {
+      socket?.off('lang-change');
+    };
+  }, [socket]);
+
 
   function handleInputChange(e:any){
     setInput(e.target.value)
@@ -108,13 +112,14 @@ export default function CodeEditor({collab}:CodeEditorProps) {
     router.push(`/code-editor/${id}`)
     toast({
       title: "Collaborative Editor Created",
-      description: "Editor that can be added it by multy users created!"
+      description: "Editor that can be added it by multi users created!"
     })
   }
   function handleLeaveEditor(){
-    router.push(`/code-editor/`)
+    socket?.disconnect();
+    router.push(`/code-editor`)
     toast({
-      title: "Disconected sucessfuly from the editor"
+      title: "Disconnected successfully from the editor"
     })
   }
   return (
@@ -152,6 +157,7 @@ export default function CodeEditor({collab}:CodeEditorProps) {
           variant={"destructive"}
           onClick={() => {
             setCode("");
+            socket?.emit('code-change', code);
             toast({
               title: "Cleared",
               description: "The code in the editor has just been cleared",

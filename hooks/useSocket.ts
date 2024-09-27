@@ -1,31 +1,34 @@
-import { useEffect } from 'react';
-import {io} from 'socket.io-client';
+import { useEffect, useRef } from 'react';
+import {io, Socket} from 'socket.io-client';
 
+const socketUrl = 'https://code-meet-server.onrender.com';
+console.log(socketUrl);
 
-const socket = io('https://code-meet-socket-server.vercel.app:3000', {
-    transports: ['websocket'], // Specify WebSocket transport,
-  });
+const useSocket = (collab: boolean): Socket | null => {
+  const socketRef = useRef<Socket | null>(null);
 
-const useSocket = (collab: boolean) => {
-  if (collab) {
-    console.log(collab)
-    useEffect(() => {
-      socket.on('connect', () => {
-          console.log('Connected to server');
-        });
-    
-        socket.on('disconnect', () => {
-          console.log('Disconnected from server');
+  useEffect(() => {
+    if (collab && !socketRef.current) {
+      socketRef.current = io(socketUrl);
+
+      socketRef.current.on('connect', () => {
+        console.log('Connected to server');
       });
-      return () => {
-          // if (socket.connected) {
-          //     socket.disconnect();
-          //   }      
-      };
-    }, []);
 
-    return socket;
-  }
+      socketRef.current.on('disconnect', () => {
+        console.log('Disconnected from server');
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        // socketRef.current.disconnect();
+        // socketRef.current = null;
+      }
+    };
+  }, [collab]);
+
+  return socketRef.current;
 };
 
 export default useSocket;
